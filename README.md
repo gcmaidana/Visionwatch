@@ -33,16 +33,16 @@ Whether someone is a live streamer or simply just a player, one thing about trac
 I initially started this project in C++. I was talking to a recruiter at Blizzard, from the Overwatch team specifically, and he told me that the Overwatch team primarily uses C++. I'll include the screenshot of that conversation below this paragraph (though I'll keep the recruiter anonymous for privacy reasons). The reason I ended up switching to Python is because when you work with Tesseract in C++, you have to download the entire OCR engine using a package manager like vcpkg, as well as link it to Visual Studio. I did end up doing that and worked on the project for a bit in C++, but it was really tedious finding resources for when I was stuck because most people who work with Tesseract tend to use Python. Additionally, detecting the text was difficult due to the font Overwatch uses. That led me down a rabbit hole that took a lot of my time as I tried training a custom font, but to no avail. The reality is, it's much less of a headache working with binary files provided by [UB Mannequin](https://github.com/UB-Mannheim/tesseract/wiki) because PyTesseract exists, which is a Python wrapper for Tesseract. This avoids having to download Tesseract in its entirety. Even beyond that, I had to think of my end user, and while making the project in C++ makes more sense since I would like to work on the Overwatch team or the games industry in general, I don't think making a user download the entirety of Tesseract through a package manager like vcpkg (which takes quite a bit of time to download!) was practical or user-friendly. I chose Python and PyTesseract for both ease-of-use for me, as well as the end user who wishes to use this program. In addition to the recruiter's comment about the Overwatch team using C++, I've included some other things he told me in case anyone finds it useful as I did.
 
 <p align="center">
-  <img src="https://github.com/gcmaidana/OverwatchVision/blob/main/recruitercomments.png"/>
+  <img src="https://github.com/gcmaidana/Visionwatch/blob/master/images/recruitercomments.png"/>
 </p>
 
 <p align="center">
-<img src="https://github.com/gcmaidana/OverwatchVision/blob/main/experience1.png"/>
+<img src="https://github.com/gcmaidana/Visionwatch/blob/master/images/experience1.png"/>
 </p>
 
 
 <p align="center">
-<img src="https://github.com/gcmaidana/OverwatchVision/blob/main/experience2.png"/>
+<img src="https://github.com/gcmaidana/Visionwatch/blob/master/images/experience2.png"/>
 </p>
 
 
