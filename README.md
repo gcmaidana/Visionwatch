@@ -15,8 +15,8 @@ This program is meant to track and update a win-loss record in [Overwatch 2](htt
 * We repeat the process continually
 
 # Examples
-![Alt Text](https://github.com/gcmaidana/VisionWatch/blob/main/ocr_win.gif)
-![Alt Text](https://github.com/gcmaidana/VisionWatch/blob/main/ocr_defeat.gif)
+![Alt Text](https://github.com/gcmaidana/Visionwatch/blob/master/images/ocr_win.gif)
+![Alt Text](https://github.com/gcmaidana/Visionwatch/blob/master/images/ocr_defeat.gif)
 
 <p align="center">
   <img src="https://github.com/gcmaidana/OverwatchVision-2/blob/main/ocr_win_log.png"/>
