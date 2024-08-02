@@ -1,167 +1,176 @@
-import random
+"""
+@author: Gean Maidana Dollanarte
+"""
+
 import pytesseract
 import cv2
 import numpy as np
-import re
-from PIL import Image
+import pyautogui
+import Levenshtein
 
-# To-do: att the end when im done, dont write an image ifn ot necessar,y just less efficeint program
+# Outcomes we want (in-game "victory" has an exclamation point, but if we get a perfect match without the exclamation point, we'll take it!)
+ocr_strings = ["VICTORY", "DEFEAT", "VICTORY!"] 
 
-ocr_strings = ["VICTORY", "VICTORY!" "DRAW", "DEFEAT"]
+# The Levenshtein distance - how close we want our imperfect output to be to any given word in ocr_strings
+l_distaince = 4 
 
-# Crop configurations
-# OpenCV coordinates (0,0) start at top left. 
-# X-axis will go from left to right
-# Y-axis will go from top to bottom
-# I used GIMP to manually figure out my start/end points
-# x = my start point coordinate
-# width = my end point coordinate - my start point coordinate
-# Same logic applies to y and height
-# This is for 1920x1080, feel free to manually tweak if you have different monitor resolution
-# Final note, while you should try to avoid noise because it messes with OCR, cropping too small
-# will lead to no text detection, so be careful
+# Crop configurations:
+# 1. OpenCV coordinate (0,0) starts at top left. 
+# 2. X-axis will go from left to right
+# 3. Y-axis will go from top to bottom
+# 4. I used GIMP to manually figure out my start/end points for cropping
+#    x = my start point coordinate
+#    width = my end point coordinate - my start point coordinate
+#    Same logic applies to y and height
+# 5. Coordinates are for 1920x1080, feel free to manually tweak if you have different monitor resolution
+# 6. On a final note, while you should try to avoid noise because it messes with OCR, cropping too small
+#    will lead to no text detection, so be careful with cropping too small if you mess with these numbers
+
+# Live program coordinates (e.g. debug_mode = False)
 x = 690
-y = 260 
+y = 330 
 width = 570 
 height = 370
 
+# Testing coordinates for pre-determined images in debug_mode
+# They differ from live program coordinates because my manual screenshots aren't perfectly 1920x1080 since I took
+# manual screenshots with Gyazo
+# x = 690
+# y = 260 
+# width = 570 
+# height = 370
 
+# This
 class ScreenshotManager:
+    """
+    Holds functionality for taking screenshot, pre-processing screenshot with OpenCV, and detecting text from the
+    pre-processed screenshot using Tesseract 
+    """
+
     def __init__(self):
-        self.debug_mode = True # This is for manually testing screenshots, turn off when running live
-        pytesseract.pytesseract.tesseract_cmd = r'F:\Tesseract-OCR\tesseract.exe'  # Update this path to where-ever yours is
+        """
+        Variables for whether to manually test screenshots or run the program live (e.g. not in debug mode)
+        """
+        
+
+        # To run program live and still write (save) screenshots, set debug_mode = True, and in the if condition, change to "if not self.debug_mode"
+        self.debug_mode = False 
+
+        # Displays images when running the program, not necessary for live running or when not debugging image detection
+        self.display_images = False 
+
+        # Update this path to where-ever yours is
+        # Tesseract-OCR files are from UB-Mannheim (University of Mannheim)
+        pytesseract.pytesseract.tesseract_cmd = r'F:\Tesseract-OCR\tesseract.exe'  
 
     def capture_and_process_screenshot(self):
 
+        # This is for manually testing with a pre-determined screenshot
+        # I wouldn't waste too much time tweaking any functions to preprocess and perfectly detect a pre-determined image 
+        # because one bad pre-determined image can inadvertently force you to change a good OCR pre-processing method
+        
         if self.debug_mode:
 
+            # Load image and display it
+            victory_image = cv2.imread("debug/manual/permanent/victory.JPG")  
+            if self.display_images:           
+                cv2.imshow("victory image", victory_image)
+                cv2.waitKey(0)
 
-            # Load images
-            victory_image = cv2.imread("debug/manual/permanent/victory.JPG")
-            draw_image = cv2.imread("debug/manual/permanent/draw.JPG")  
-            defeat_image = cv2.imread("debug/manual/permanent/defeat.JPG")
-            cv2.imshow("victory image", victory_image)
-            cv2.waitKey(0)
-            cv2.imshow("draw image", draw_image)
-            cv2.waitKey(0)
-            cv2.imshow("defeat image", defeat_image)
-            cv2.waitKey(0)
-
-            # Crop images
+            # Crop image
             cropped_vic = self.crop(victory_image, "debug/manual/victory/croppedVICTORY.JPG")
-            cropped_draw = self.crop(draw_image, "debug/manual/draw/croppedDRAW.JPG")
-            cropped_def = self.crop(defeat_image, "debug/manual/defeat/croppedDEFEAT.JPG")
-            
-
-            
-            # Invert images
+                     
+            # Invert image
             self.invert_image(cropped_vic, "debug/manual/victory/invertedVICTORY.jpg")
-            self.invert_image(cropped_draw, "debug/manual/draw/invertedDRAW.jpg")
-            self.invert_image(cropped_def, "debug/manual/defeat/invertedDEFEAT.jpg")
-
-
-            # Binarization     
-            # Convert to greyscale first
+                
+            # Convert to greyscale 
             grey_vic = self.convert_img_to_greyscale(cropped_vic, "debug/manual/victory/greyscaleVICTORY.jpg")
-            grey_draw = self.convert_img_to_greyscale(cropped_draw, "debug/manual/draw/greyscaleDRAW.jpg")
-            grey_defeat = self.convert_img_to_greyscale(cropped_def, "debug/manual/defeat/greyscaleDEFEAT.jpg")
             
-            # Now bianarize, invert, and detect text (we invert again so our text is black on white background, I had more success with this)
+            # Binarize
             bw_vic = self.binarize_image(grey_vic, "debug/manual/victory/vic_bw_image.jpg")
+
+            # Invert (We invert again so our text is black on white background, I had more success with this pre-processing method)
             bw_vic = self.invert_image(bw_vic, "debug/manual/victory/invertedVICTORY.jpg") 
+
             ocr_result = pytesseract.image_to_string(bw_vic)
             ans = self.process_conditions(ocr_result)
             print("Binarized victory image text: ", ans)
             print()
 
-            bw_draw = self.binarize_image(grey_draw, "debug/manual/draw/draw_bw_image.jpg")
-            bw_draw = self.invert_image(bw_draw, "debug/manual/draw/invertedDRAW.jpg")
-            ocr_result = pytesseract.image_to_string(bw_draw)
-            ans = self.process_conditions(ocr_result)
-            print("Binarized draw image text: ", ans)
-            print()
-
-            bw_def = self.binarize_image(grey_defeat, "debug/manual/defeat/def_bw_image.jpg") 
-            bw_def = self.invert_image(bw_def, "debug/manual/defeat/invertedDEFEAT.jpg")
-            ocr_result = pytesseract.image_to_string(bw_def)
-            ans = self.process_conditions(ocr_result)
-            print("Binarized defeat image text: ", ans) 
-            print()
-
-
-
-        return;
-        '''
-         else:
-            screenshot = self.capture_screenshot()
-            os.makedirs("debug/images", exist_ok=True)
-            cv2.imwrite(f"debug/images/OGimage{self.count}.png", screenshot)
-            print("Original screenshot saved!")
-
-            # Crop the screenshot (adjust these values as needed)
-            height, width = screenshot.shape[:2]
-            x = int(width * 0.25)
-            y = int(height * 0.33)
-            crop_width = int(width * 0.5)
-            crop_height = int(height * 0.33)
-            cropped_screenshot = screenshot[y:y+crop_height, x:x+crop_width]
-
-            cv2.imwrite(f"debug/images/crop{self.count}.png", cropped_screenshot)
-            print("Cropped screenshot saved!")
-
-            # Convert to grayscale
-            gray_screenshot = cv2.cvtColor(cropped_screenshot, cv2.COLOR_BGR2GRAY)
-
-            cv2.imwrite(f"debug/images/grayscale{self.count}.png", gray_screenshot)
-            print("Grayscale screenshot saved!")
-
-            # Perform OCR
-            pytesseract.image_to_string(gray_screenshot, config='--psm 7 -c tessedit_char_whitelist=DRAWVICTORYDEFEAT')
-            print(f"Detected text: {text.strip()}")
-
-            return text.strip()
+            return ans
+            
         
-        '''
-        
-    def capture_screenshot(self):
-        # Was gonna use pillow for screenshot, now ill just pyautogui
+        else:
+            # The called function as well as the crop configuration variables are perfected for 1920x1080 resolution
+            screenshot = self.capture_screenshot("debug/manual/live/OriginalSCREENSHOT.JPG")
 
-        image = pyautogui.screenshot(region=(0,0,1920,1080))
-        return cv2.cvtColor(np.array(image), cv2.COLOR_BGR2HSV_FULL)
+            # Preprocess screenshot by cropping, inverting, greyscaling, binarizing, and inverting again
+            cropped_img = self.crop(screenshot, "debug/manual/live/croppedSCREENSHOT.JPG")
+
+            self.invert_image(cropped_img, "debug/manual/live/inverted1SCREENSHOT.jpg")
+
+            grey_img = self.convert_img_to_greyscale(cropped_img, "debug/manual/live/greyscaleSCREENSHOT.jpg")
+
+            bw_img = self.binarize_image(grey_img, "debug/manual/live/bianarized_image.jpg")
+
+            bw_img = self.invert_image(bw_img, "debug/manual/live/invertedAfterBianarizeVICTORY.jpg") 
+
+            ocr_result = pytesseract.image_to_string(bw_img)
+            ans = self.process_conditions(ocr_result)
+
+            return ans
+        
+        
+    def capture_screenshot(self, save_path):
+        image = pyautogui.screenshot(region=(0, 0, 1920, 1080))
+        image = cv2.cvtColor(np.array(image),cv2.COLOR_BGR2HSV_FULL)
+        if self.debug_mode:
+            cv2.imwrite(save_path, image)
+        return image
     
     def crop(self, img, save_path):
         cropped_img = img[y:y+height, x:x+width]
-        cv2.imwrite(save_path, cropped_img)
-        cv2.imshow("cropped image", cropped_img)
-        cv2.waitKey(0)
+        if self.debug_mode:
+            cv2.imwrite(save_path, cropped_img)
+        if self.display_images:
+            cv2.imshow("cropped image", cropped_img)
+            cv2.waitKey(0)
         return cropped_img
 
-
+    '''
+    Refer to my "victory" image folder that I used to test these functions on a pre-determined screenshot
+    in order to see what effect these functions and my pre-processing method has on a screenshot
+    '''
     def invert_image(self, img, save_path):
         inverted_img = cv2.bitwise_not(img)
-        cv2.imwrite(save_path, inverted_img)
-        cv2.imshow("inverted image", inverted_img)
-        cv2.waitKey(0)
+        if self.debug_mode:
+            cv2.imwrite(save_path, inverted_img)
+        if self.display_images:
+            cv2.imshow("inverted image", inverted_img)
+            cv2.waitKey(0)
         return inverted_img
     
     def convert_img_to_greyscale(self, img, save_path):
         grey_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        cv2.imwrite(save_path, grey_img)
-        cv2.imshow("greyscale image", grey_img)
-        cv2.waitKey(0)
+        if self.debug_mode:
+            cv2.imwrite(save_path, grey_img)
+        if self.display_images:
+            cv2.imshow("greyscale image", grey_img)
+            cv2.waitKey(0)
         return grey_img
 
 
     def binarize_image(self, img, save_path): 
         # Black and white processing
         img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
-        
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
         img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel, iterations=3)
         img = cv2.GaussianBlur(img, (5,5), 0)
-        cv2.imwrite(save_path, img)
-        cv2.imshow("thresh img", img)
-        cv2.waitKey(0)
+        if self.debug_mode:
+            cv2.imwrite(save_path, img)
+        if self.display_images:
+            cv2.imshow("thresh img", img)
+            cv2.waitKey(0)
         return img
      
     def process_conditions(self, txt):
@@ -170,13 +179,14 @@ class ScreenshotManager:
         if txt in ocr_strings:
             return txt
         
-        # Cases wher we have something like "0RAW" or "VICTO" e.g. incomplete words due to imperfect OCR detection
-        elif re.search('[VICO]', txt, re.I):
-                return "VICTORY" 
-        elif re.search('[A]', txt, re.I):
-                return "DRAW"
-        elif re.search('[EF]', txt, re.I):
-            return "DEFEAT"
-        else:
-            return "NONE" 
+        # Use Levenshtein distance for better matching
+        txt = txt.strip().upper()
+
+        # We will splice because we don't need to include both "VICTORY" and "VICTORY!"
+        # The reason we have both is because in-game, the victory screen has an exclamation point (defeat does not, however)
+        for word in ocr_strings[0:2]: 
+            if Levenshtein.distance(txt, word) <= l_distaince:
+                return word
+
+        return "NONE"
 
