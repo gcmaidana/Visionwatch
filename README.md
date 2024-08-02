@@ -52,14 +52,14 @@ I initially started this project in C++. I was talking to a recruiter at Blizzar
 In this project, when I detect a win or a loss in a game and I update the record, that record will be reflected on screen through [OBS](https://obsproject.com/) while someone is livestreaming. I knew this was technically feasible because I saw this cool project of someone training an AI to fight an enemy in the game Elden Ring, the project is called [EldenRingAI](https://github.com/jameszampa/EldenRingAI). Whenever the AI was defeated, a counter on the screen would be updated to show how many times attempts the AI has made thus far. Because I came across this cool project, I knew there was a way I could mess with the numbers in my win-loss record in an automated way and get it to show up in OBS. Below is a screenshot of the EldenRingAI project I came across.
 
 <p align="center">
-  <img src="https://github.com/gcmaidana/OverwatchVision/blob/main/eldenringai.jpg"/>
+  <img src="https://github.com/gcmaidana/Visionwatch/blob/master/images/eldenringai.jpg"/>
 </p>
 
 <br>
 Another project that I took inspiration from is this [Dark Souls death counter project that uses OCR](https://github.com/Jan-9C/deathcounter_ocr/). In Dark Souls, when a player dies, the text "YOU DIED" shows up on screen, and this project detects that text to add to the counter. Below is a screenshot of the project
 
 <p align="center">
-  <img src="https://github.com/gcmaidana/OverwatchVision/blob/main/readmeDeathcounter.png"/>
+  <img src="https://github.com/gcmaidana/Visionwatch/blob/master/images/readmeDeathcounter.png"/>
 </p>
 
 I took inspiration from the Dark Souls project by wanting to use OCR to figure out when an event happens (win or loss) and I took inspiration from the EldenRingAI project by wanting to automatically update the record through writing to the text file and having that be reflected on screen through OBS.
