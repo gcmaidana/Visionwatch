@@ -19,10 +19,10 @@ This program is meant to track and update a win-loss record in [Overwatch 2](htt
 ![Alt Text](https://github.com/gcmaidana/Visionwatch/blob/master/images/ocr_defeat.gif)
 
 <p align="center">
-  <img src="https://github.com/gcmaidana/OverwatchVision-2/blob/main/ocr_win_log.png"/>
+  <img src="https://github.com/gcmaidana/Visionwatch/blob/master/images/ocr_win_log.png"/>
 </p>
 <p align="center">
-  <img src="https://github.com/gcmaidana/OverwatchVision-2/blob/main/ocr_defeat_log.png"/>
+  <img src="https://github.com/gcmaidana/Visionwatch/blob/master/images/ocr_defeat_log.png"/>
 </p>
 
 
