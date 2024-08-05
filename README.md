@@ -56,6 +56,7 @@ In this project, when I detect a win or a loss in a game and I update the record
 </p>
 
 <br>
+
 Another project that I took inspiration from is this [Dark Souls death counter project that uses OCR](https://github.com/Jan-9C/deathcounter_ocr). In Dark Souls, when a player dies, the text "YOU DIED" shows up on screen, and this project detects that text to add to the counter. Below is a screenshot of the project
 
 <p align="center">
