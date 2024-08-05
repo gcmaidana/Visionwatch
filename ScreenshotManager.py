@@ -12,7 +12,7 @@ import Levenshtein
 ocr_strings = ["VICTORY", "DEFEAT", "VICTORY!"] 
 
 # The Levenshtein distance - how close we want our imperfect output to be to any given word in ocr_strings
-l_distaince = 4 
+l_distance = 4 
 
 # Crop configurations:
 # 1. OpenCV coordinate (0,0) starts at top left. 
@@ -185,7 +185,7 @@ class ScreenshotManager:
         # We will splice because we don't need to include both "VICTORY" and "VICTORY!"
         # The reason we have both is because in-game, the victory screen has an exclamation point (defeat does not, however)
         for word in ocr_strings[0:2]: 
-            if Levenshtein.distance(txt, word) <= l_distaince:
+            if Levenshtein.distance(txt, word) <= l_distance:
                 return word
 
         return "NONE"
